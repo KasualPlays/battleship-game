@@ -1,0 +1,33 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Battleship!</title>
+    <link rel="stylesheet" href="main-page.css">
+</head>
+<body>
+    <h1>Battleship!</h1>
+    <main>
+    <h2>Computer's Board</h2>
+    <table id="comp-board" class="board">
+        <thead></thead>
+        <tbody></tbody>
+    </table>
+    <div class="player-info-row">
+        <p class="turn-indicator">Your turn</p>
+        <button id="new-game-btn">New Game</button>
+    </div>
+    <div class="controls">
+    <label for="row-select">Row</label>
+    <select id="row-select"></select>
+
+    <label for="column-select">Column</label>
+    <select id="column-select"></select>
+
+    <button id="fire-btn">Fire</button>
+</div>
+</main>
+<script src="battleship.js"></script>
+</body>
+</html>
