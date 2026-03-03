@@ -25,18 +25,27 @@
             </table>
         </div>
     </div>
-    <div class="player-info-row">
-        <p class="turn-indicator">Your turn</p>
-        <button id="new-game-btn">New Game</button>
+    <!-- Placement phase: visible at start -->
+    <div id="placement-controls" class="player-info-row">
+        <p id="status-msg" class="turn-indicator">Place your Aircraft Carrier (5)</p>
+        <button id="rotate-btn">Rotate: Horizontal</button>
     </div>
-    <div class="controls">
-        <label for="row-select">Row</label>
-        <select id="row-select"></select>
 
-        <label for="column-select">Column</label>
-        <select id="column-select"></select>
+    <!-- Game phase: hidden until ships are placed -->
+    <div id="game-controls" style="display: none;">
+        <div class="player-info-row">
+            <p class="turn-indicator">Your turn</p>
+            <button id="new-game-btn">New Game</button>
+        </div>
+        <div class="controls">
+            <label for="row-select">Row</label>
+            <select id="row-select"></select>
 
-        <button id="fire-btn">Fire</button>
+            <label for="column-select">Column</label>
+            <select id="column-select"></select>
+
+            <button id="fire-btn">Fire</button>
+        </div>
     </div>
 </main>
 <script src="battleship.js"></script>

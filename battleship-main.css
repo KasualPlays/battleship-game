@@ -322,16 +322,39 @@ button:disabled {
 }
 
 #fire-btn {
-    padding: 12px 30px;
-    color: var(--accent);
+    padding: 8px 30px;
+    color: white;
     background: none;
-    border: 2px solid var(--accent);
-    box-shadow: -3px 4px var(--accent);
+    border: 2px solid rgb(200, 30, 30);
+    text-transform: uppercase;
+    letter-spacing: 0.1em;
+    box-shadow: 0 0 8px rgba(200, 30, 30, 0.4),
+                0 0 20px rgba(200, 30, 30, 0.15);
+    animation: fire-pulse 2s ease-in-out infinite;
 }
 
 #fire-btn:hover {
-    background-color: var(--accent);
-    color: black;
+    background-color: rgba(200, 30, 30, 0.25);
+    border-color: rgb(230, 50, 50);
+    box-shadow: 0 0 12px rgba(230, 50, 50, 0.6),
+                0 0 30px rgba(230, 50, 50, 0.25);
+    animation: none;
+}
+
+#fire-btn:active {
+    transform: scale(0.95);
+    background-color: rgba(200, 30, 30, 0.4);
+}
+
+@keyframes fire-pulse {
+    0%, 100% {
+        box-shadow: 0 0 8px rgba(200, 30, 30, 0.4),
+                    0 0 20px rgba(200, 30, 30, 0.15);
+    }
+    50% {
+        box-shadow: 0 0 14px rgba(230, 50, 50, 0.7),
+                    0 0 35px rgba(230, 50, 50, 0.3);
+    }
 }
 
 /* ---- Placement Phase ---- */
