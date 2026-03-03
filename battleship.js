@@ -22,14 +22,14 @@ function createHeaderRow() {
     return headerRow;
 }
 
-function createBoardRow(rowLetter) {
+function createBoardRow(prefix, rowLetter) {
     const tr = document.createElement("tr");
     const th = document.createElement("th");
     th.textContent = rowLetter;
     tr.appendChild(th);
     for (let c = 1; c <= BOARD_SIZE; c++) {
         const td = document.createElement("td");
-        td.id = rowLetter + c;
+        td.id = prefix + rowLetter + c;
         tr.appendChild(td);
     }
     return tr;
@@ -37,24 +37,24 @@ function createBoardRow(rowLetter) {
 
 // ---- Board Creation ----
 
-function createBoard(boardId) {
+function createBoard(boardId, prefix) {
     const board = document.getElementById(boardId);
 
     board.querySelector("thead").appendChild(createHeaderRow());
 
     for (let r = 0; r < ROWS.length; r++) {
-        board.querySelector("tbody").appendChild(createBoardRow(ROWS[r]));
+        board.querySelector("tbody").appendChild(createBoardRow(prefix, ROWS[r]));
     }
 }
 
 // ---- Ship Placement Helpers ----
 
-/** Returns a cell ID (e.g. "A5") offset from a starting position in the given direction. */
-function getCellId(direction, startRowIndex, startCol, offset) {
+/** Returns a cell ID (e.g. "comp-A5") offset from a starting position in the given direction. */
+function getCellId(prefix, direction, startRowIndex, startCol, offset) {
     if (direction === "horizontal") {
-        return ROWS[startRowIndex] + (startCol + offset);
+        return prefix + ROWS[startRowIndex] + (startCol + offset);
     }
-    return ROWS[startRowIndex + offset] + startCol;
+    return prefix + ROWS[startRowIndex + offset] + startCol;
 }
 
 /** Returns a random direction, row index and column for ship placement. */
@@ -74,9 +74,9 @@ function shipFits(direction, startRowIndex, startCol, size) {
 }
 
 /** Returns true if any cell in the proposed range already contains a ship. */
-function hasOverlap(direction, startRowIndex, startCol, size) {
+function hasOverlap(prefix, direction, startRowIndex, startCol, size) {
     for (let i = 0; i < size; i++) {
-        const cellId = getCellId(direction, startRowIndex, startCol, i);
+        const cellId = getCellId(prefix, direction, startRowIndex, startCol, i);
         const cell = document.getElementById(cellId);
         if (cell.classList.contains("ship")) {
             return true;
@@ -85,9 +85,9 @@ function hasOverlap(direction, startRowIndex, startCol, size) {
     return false;
 }
 
-function placeShip(ship, direction, startRowIndex, startCol) {
+function placeShip(prefix, ship, direction, startRowIndex, startCol) {
     for (let i = 0; i < ship.size; i++) {
-        const cellId = getCellId(direction, startRowIndex, startCol, i);
+        const cellId = getCellId(prefix, direction, startRowIndex, startCol, i);
         const cell = document.getElementById(cellId);
         cell.classList.add("ship");
         cell.dataset.ship = ship.letter;
@@ -104,9 +104,9 @@ function placeCompShips() {
             const { direction, startRowIndex, startCol } = getRandomPosition();
 
             if (!shipFits(direction, startRowIndex, startCol, ship.size)) continue;
-            if (hasOverlap(direction, startRowIndex, startCol, ship.size)) continue;
+            if (hasOverlap("comp-", direction, startRowIndex, startCol, ship.size)) continue;
 
-            placeShip(ship, direction, startRowIndex, startCol);
+            placeShip("comp-", ship, direction, startRowIndex, startCol);
             placed = true;
         }
     }
@@ -160,7 +160,7 @@ function setupFireButton() {
     const colSelect = document.getElementById("column-select");
 
     document.getElementById("fire-btn").addEventListener("click", function () {
-        const cellId = rowSelect.value + colSelect.value;
+        const cellId = "comp-" + rowSelect.value + colSelect.value;
         const cell = document.getElementById(cellId);
 
         if (alreadyFired(cell)) {
@@ -174,7 +174,8 @@ function setupFireButton() {
 
 // ---- Initialise ----
 function init() {
-    createBoard("comp-board");
+    createBoard("comp-board", "comp-");
+    createBoard("player-board", "player-");
     placeCompShips();
     populateDropdowns();
     setupFireButton();

@@ -1,0 +1,415 @@
+@import url("https://fonts.googleapis.com/css2?family=Poppins:wght@100;200;300;400;500;600;700;800;900&family=IBM+Plex+Mono:wght@100;200;300;400;500;600;700&display=swap");
+
+
+*,
+*::before,
+*::after {
+    box-sizing: border-box;
+}
+
+* {
+    margin: 0;
+    padding: 0;
+    font: inherit;
+}
+
+::selection {
+    background-color: hsla(210, 90%, 40%, 0.6);
+    color: white;
+}
+
+/* ---- Color Palette ---- */
+
+:root {
+    --accent: rgb(25, 133, 255);
+    --accent-light: rgb(77, 195, 255);
+    --accent-glow: rgba(25, 133, 255, 0.35);
+    --bg: rgb(12, 14, 18);
+    --surface: rgba(13, 20, 31, 0.6);
+    --border: rgb(39, 43, 54);
+    --border-light: rgb(54, 60, 73);
+    --text: rgb(199, 210, 224);
+    --text-muted: rgb(115, 121, 128);
+    --hit-color: rgb(214, 40, 40);
+    --hit-glow: rgb(255, 128, 0);
+    --miss-color: rgb(31, 163, 72);
+    --ship-color: rgb(45, 82, 128);
+}
+
+
+/* ---- Animations ---- */
+
+@keyframes setShip {
+    0% {
+        transform: scale(0);
+        background-color: transparent;
+    }
+    100% {
+        transform: scale(1);
+        background-color: var(--ship-color);
+    }
+}
+
+@keyframes hit {
+    0% {
+        transform: scale(0);
+        opacity: 0;
+        background-color: transparent;
+    }
+    10% {
+        transform: scale(1.2);
+        opacity: 1;
+        background-color: var(--hit-glow);
+        box-shadow: 0 0 12px 4px var(--hit-color);
+    }
+    100% {
+        transform: scale(0.85);
+        opacity: 0.9;
+        background-color: var(--hit-color);
+        box-shadow: 0 0 8px 2px var(--hit-color);
+    }
+}
+
+@keyframes miss {
+    0% {
+        transform: scale(0);
+        opacity: 1;
+        background-color: transparent;
+    }
+    100% {
+        transform: scale(1);
+        opacity: 0.85;
+        background-color: var(--miss-color);
+    }
+}
+
+/* ---- Base ---- */
+
+html {
+    height: 100%;
+    font-size: 10px;
+}
+
+body {
+    min-height: 100%;
+    background-color: var(--bg);
+    font-family: "Poppins", sans-serif;
+    font-size: 1.4rem;
+    line-height: 1.35;
+    color: var(--text);
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+}
+
+main {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    padding: 0 25px 50px;
+}
+
+/* ---- Headings ---- */
+
+h1 {
+    font-size: 5rem;
+    font-weight: 800;
+    letter-spacing: 0.06em;
+    color: white;
+    margin: 30px 0 10px;
+    line-height: 1;
+    margin-bottom: 60px;
+}
+
+h2 {
+    font-size: 1.8rem;
+    font-weight: 700;
+    color: var(--text);
+    margin: 0;
+}
+
+/* ---- Board Titles ---- */
+
+.board-title {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+}
+
+/* ---- Boards side by side ---- */
+
+.board-container {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+}
+
+.boards {
+    display: flex;
+    justify-content: center;
+    gap: 80px;
+}
+
+/* ---- Board ---- */
+
+.board {
+    border-collapse: separate;
+    border-spacing: 0;
+    border: 2px solid var(--accent);
+}
+
+#player-board {
+    border-color: var(--border-light);
+}
+
+.board th,
+.board td {
+    width: 42px;
+    height: 42px;
+    text-align: center;
+    vertical-align: middle;
+    font-size: 1.2rem;
+    
+}
+
+.board th {
+    color: var(--text-muted);
+    font-weight: 600;
+    font-size: 1.4rem;
+    font-family: "IBM Plex Mono", monospace;
+}
+
+.board td {
+    position: relative;
+    border: 1px solid var(--border);
+    color: transparent;
+    cursor: default;
+    background-color: hsla(210, 30%, 8%, 0.5);
+    transition: 0.25s background-color, 0.25s border ease;
+    user-select: none;
+    -webkit-user-select: none;
+    font-family: "IBM Plex Mono", monospace;
+}
+
+/* Subtle checkerboard */
+.board tbody tr:nth-child(odd) td:nth-child(even),
+.board tbody tr:nth-child(even) td:nth-child(odd) {
+    background-color: hsla(210, 30%, 10%, 0.4);
+}
+
+/* Hover — computer board only */
+#comp-board td:hover {
+    cursor: pointer;
+    background-color: var(--accent-glow);
+    border-color: var(--accent);
+}
+
+#player-board td {
+    border-color: hsla(210, 10%, 15%, 0.85);
+}
+
+/* ---- Ship cells ---- */
+
+.board td.ship {
+    color: white;
+    font-weight: 600;
+    animation: setShip 0.5s forwards;
+}
+
+/* ---- Hit cells ---- */
+
+.board td.hit {
+    color: white;
+    font-weight: 700;
+    font-size: 1.6rem;
+    font-family: "IBM Plex Mono", monospace;
+    animation: hit 0.8s forwards;
+}
+
+/* ---- Miss cells ---- */
+
+.board td.miss {
+    color: white;
+    font-weight: 600;
+    font-size: 1.4rem;
+    animation: miss 0.6s forwards;
+}
+
+/* ---- Status Bar ---- */
+
+.player-info-row {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    gap: 30px;
+    margin-top: 30px;
+    padding: 0;
+    border: none;
+    background-color: none;
+}
+
+.turn-indicator {
+    font-size: 1.8rem;
+    font-weight: 700;
+    text-transform: uppercase;
+    letter-spacing: 0.08em;
+    color: var(--accent-light);
+}
+
+/* ---- Buttons ---- */
+
+button {
+    position: relative;
+    appearance: none;
+    border: none;
+    cursor: pointer;
+    font-family: "Poppins", sans-serif;
+    font-size: 1.4rem;
+    font-weight: 700;
+    transition: 0.2s all ease;
+}
+
+button:disabled {
+    opacity: 0.5;
+    cursor: auto;
+}
+
+#new-game-btn {
+    padding: 12px 24px;
+    background: none;
+    color: white;
+    border: 2px solid white;
+}
+
+#new-game-btn:hover {
+    background-color: white;
+    color: black;
+}
+
+/* ---- Controls ---- */
+
+.controls {
+    display: flex;
+    flex-direction: row;
+    align-items: center;
+    gap: 16px;
+    margin-top: 20px;
+}
+
+.controls label {
+    font-size: 1.3rem;
+    font-weight: 600;
+    text-transform: uppercase;
+    letter-spacing: 0.04em;
+    color: var(--text-muted);
+}
+
+.controls select {
+    padding: 8px 14px;
+    font-size: 1.4rem;
+    font-family: "IBM Plex Mono", monospace;
+    border-radius: 0;
+    border: 2px solid var(--border-light);
+    background-color: var(--bg);
+    color: white;
+    cursor: pointer;
+    transition: 0.2s border-color ease;
+}
+
+.controls select:focus {
+    outline: none;
+    border-color: var(--accent);
+}
+
+#fire-btn {
+    padding: 12px 30px;
+    color: var(--accent);
+    background: none;
+    border: 2px solid var(--accent);
+    box-shadow: -3px 4px var(--accent);
+}
+
+#fire-btn:hover {
+    background-color: var(--accent);
+    color: black;
+}
+
+/* ---- Placement Phase ---- */
+
+#player-board.placing td:hover {
+    cursor: pointer;
+}
+
+.board td.preview {
+    background-color: rgba(25, 133, 255, 0.4);
+    border-color: var(--accent);
+}
+
+.board td.preview-invalid {
+    background-color: rgba(214, 40, 40, 0.35);
+    border-color: var(--hit-color);
+}
+
+#rotate-btn {
+    padding: 12px 24px;
+    background: none;
+    color: var(--accent);
+    border: 2px solid var(--accent);
+    box-shadow: -3px 4px var(--accent);
+}
+
+#rotate-btn:hover {
+    background-color: var(--accent);
+    color: black;
+}
+
+/* ---- Responsive ---- */
+
+@media screen and (max-width: 1100px) {
+    .boards {
+        gap: 40px;
+    }
+
+    .board th,
+    .board td {
+        width: 35px;
+        height: 35px;
+    }
+
+    .board td.hit {
+        font-size: 1.4rem;
+    }
+}
+
+@media screen and (max-width: 850px) {
+    h1 {
+        font-size: 3.5rem;
+    }
+
+    .boards {
+        flex-direction: column;
+        gap: 40px;
+    }
+
+    .board-titles {
+        flex-direction: column;
+        align-items: center;
+        gap: 10px;
+    }
+
+    .board th,
+    .board td {
+        width: 32px;
+        height: 32px;
+        font-size: 1.1rem;
+    }
+
+    .board th {
+        font-size: 1.2rem;
+    }
+
+    .controls {
+        flex-wrap: wrap;
+        justify-content: center;
+    }
+}
