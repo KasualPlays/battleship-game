@@ -25,18 +25,20 @@
             </table>
         </div>
     </div>
-    <!-- Placement phase: visible at start -->
-    <div id="placement-controls" class="player-info-row">
+    <!-- Status message + New Game button — always visible -->
+    <div class="player-info-row">
         <p id="status-msg" class="turn-indicator">Place your Aircraft Carrier (5)</p>
-        <button id="rotate-btn">Rotate: Horizontal</button>
+        <button id="new-game-btn" style="display: none;">New Game</button>
+    </div>
+
+     <div id="placement-controls">
+        <div class="controls">
+            <button id="rotate-btn">Rotate: Horizontal</button>
+        </div>
     </div>
 
     <!-- Game phase: hidden until ships are placed -->
     <div id="game-controls" style="display: none;">
-        <div class="player-info-row">
-            <p class="turn-indicator">Your turn</p>
-            <button id="new-game-btn">New Game</button>
-        </div>
         <div class="controls">
             <label for="row-select">Row</label>
             <select id="row-select"></select>

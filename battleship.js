@@ -12,6 +12,36 @@ const SHIPS = [
 let isPlayerTurn = true; //Player will always go first.
 let gameOver = false; 
 
+// ---- Board Highlight Helper ----
+
+/**
+ * setActiveBoard — highlights the board that's currently in play.
+ *
+ * "active" = blue glow (the board you're targeting/interacting with)
+ * "under-attack" = red glow (the board being shot at by the enemy)
+ *
+ * @param {string|null} mode - "player-placement", "player-turn", "comp-turn", or null
+ */
+function setActiveBoard(mode) {
+    const compContainer = document.getElementById("comp-board").closest(".board-container");
+    const playerContainer = document.getElementById("player-board").closest(".board-container");
+
+    // Clear all states first
+    compContainer.classList.remove("active", "under-attack");
+    playerContainer.classList.remove("active", "under-attack");
+
+    if (mode === "player-placement") {
+        // Placing ships: player board is active (blue)
+        playerContainer.classList.add("active");
+    } else if (mode === "player-turn") {
+        // Player is firing: computer board is the target (blue)
+        compContainer.classList.add("active");
+    } else if (mode === "comp-turn") {
+        // Computer is firing: player board is under attack (red)
+        playerContainer.classList.add("under-attack");
+    }
+}
+
 // --- Board Creation Functions ----
 
 function createHeaderRow() {
@@ -208,10 +238,20 @@ function setupPlayerPlacement() {
         const ship = SHIPS[currentShipIndex];
         const cellIds = getShipCellIds("player-", currentDirection, startRowIndex, startCol, ship.size);
 
-        // If ship goes off the board, show invalid on just the hovered cell
+        // If ship goes off the board, highlight whatever cells ARE on the board
         if (cellIds === null) {
-            const hovered = document.getElementById("player-" + ROWS[startRowIndex] + startCol);
-            if (hovered) hovered.classList.add("preview-invalid");
+            for (let i = 0; i < ship.size; i++) {
+                let r = startRowIndex;
+                let c = startCol;
+                if (currentDirection === "horizontal") {
+                    c += i;
+                } else {
+                    r += i;
+                }
+                if (r >= 0 && r < BOARD_SIZE && c >= 1 && c <= BOARD_SIZE) {
+                    document.getElementById("player-" + ROWS[r] + c).classList.add("preview");
+                }
+            }
             return false;
         }
 
@@ -225,10 +265,9 @@ function setupPlayerPlacement() {
             }
         }
 
-        // Add the appropriate highlight class
-        const previewClass = valid ? "preview" : "preview-invalid";
+        // Highlight all cells blue
         for (const id of cellIds) {
-            document.getElementById(id).classList.add(previewClass);
+            document.getElementById(id).classList.add("preview");
         }
 
         return valid;
@@ -298,7 +337,9 @@ function startGame() {
     document.getElementById("player-board").classList.remove("placing");
     document.getElementById("placement-controls").style.display = "none";
     document.getElementById("game-controls").style.display = "block";
+    document.getElementById("new-game-btn").style.display = "block";
     document.getElementById("status-msg").textContent = "Your turn! - choose a cell to fire at.";
+    setActiveBoard("player-turn");
 }
 
 // ---- Dropdown Helpers ----
@@ -333,12 +374,28 @@ function alreadyFired(cell) {
 }
 
 function fireAtCell(cell) {
+const statusMsg = document.getElementById("status-msg");
+    const isCompBoard = cell.id.startsWith("comp-");
+
+
     if (cell.classList.contains("ship")) {
         cell.classList.add("hit");
         cell.textContent = "X";
+
+        if(isCompBoard) {
+            statusMsg.textContent = "Hit! - You hit an enemy ship!";
+        } else { 
+            statusMsg.textContent = "Rats! - The computer hit your ship!";
+        }
     } else {
         cell.classList.add("miss");
         cell.textContent = "O";
+
+        if (isCompBoard) {
+            statusMsg.textContent = "Miss! - No ship there.";
+        } else {
+            statusMsg.textContent = "Phew! - Computer missed!";
+        }
     }
 }
 
@@ -369,8 +426,10 @@ function checkForWin(prefix) {
 
 function compTurn() {
     const statusMsg = document.getElementById("status-msg");
-    statusMsg.textContent = "Computer's turn...";
+    statusMsg.textContent = "Computer is thinking...";
+    setActiveBoard("comp-turn");
 
+    // Step 1: Wait 1.5s ("thinking" pause) before firing
     setTimeout(function () {
         let cell;
         do {
@@ -379,17 +438,23 @@ function compTurn() {
             cell = document.getElementById("player-" + ROWS[rowIndex] + col);
         } while (alreadyFired(cell));
 
+        // Fire — this updates the status to "Computer hit/missed!"
         fireAtCell(cell);
 
         if (checkForWin("player-")) {
-            alert("Computer wins! All your ships have been sunk.");
             gameOver = true;
+            statusMsg.textContent = "Game over! Computer wins — all your ships are sunk!";
             return;
         }
 
-        isPlayerTurn = true;
-        statusMsg.textContent = "Your turn!";
-    }, 1000); 
+        // Step 2: Wait 2s so the player can read the hit/miss result
+        setTimeout(function () {
+            isPlayerTurn = true;
+            statusMsg.textContent = "Your turn! - choose a cell to fire at.";
+            setActiveBoard("player-turn");
+        }, 2000);
+
+    }, 1500);
 }
 
 
@@ -424,8 +489,11 @@ function setupFireButton() {
             return;
         }
 
+        // Delay before computer's turn so the player can read their hit/miss message
         isPlayerTurn = false;
-        compTurn();
+        setTimeout(function () {
+            compTurn();
+        }, 1500);
     });
 }
 
@@ -437,6 +505,7 @@ function init() {
     populateDropdowns();       // Fill the Row/Column dropdowns for firing later
     setupFireButton();         // Wire up the Fire button for later
     setupPlayerPlacement();    // Start the placement phase on the player board
+    setActiveBoard("player-placement");  // Highlight player board during placement
 }
 
 init();
