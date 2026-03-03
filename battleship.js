@@ -9,36 +9,47 @@ const SHIPS = [
     { name: "Cruiser", letter: "C", size: 3 },
 ];
 
-// ---- Board Creation ----
-function createBoard(boardId) {
-    const board = document.getElementById(boardId);
+// --- Board Creation Functions ----
 
-    // Header row with column numbers
+function createHeaderRow() {
     const headerRow = document.createElement("tr");
-    headerRow.appendChild(document.createElement("th")); // empty corner cell
+    headerRow.appendChild(document.createElement("th"));
     for (let c = 1; c <= BOARD_SIZE; c++) {
         const th = document.createElement("th");
         th.textContent = c;
         headerRow.appendChild(th);
     }
-    board.querySelector("thead").appendChild(headerRow);
+    return headerRow;
+}
 
-    // Grid rows with row letters
+function createBoardRow(rowLetter) {
+    const tr = document.createElement("tr");
+    const th = document.createElement("th");
+    th.textContent = rowLetter;
+    tr.appendChild(th);
+    for (let c = 1; c <= BOARD_SIZE; c++) {
+        const td = document.createElement("td");
+        td.id = rowLetter + c;
+        tr.appendChild(td);
+    }
+    return tr;
+}
+
+// ---- Board Creation ----
+
+function createBoard(boardId) {
+    const board = document.getElementById(boardId);
+
+    board.querySelector("thead").appendChild(createHeaderRow());
+
     for (let r = 0; r < ROWS.length; r++) {
-        const tr = document.createElement("tr");
-        const th = document.createElement("th");
-        th.textContent = ROWS[r];
-        tr.appendChild(th);
-        for (let c = 1; c <= BOARD_SIZE; c++) {
-            const td = document.createElement("td");
-            td.id = ROWS[r] + c;
-            tr.appendChild(td);
-        }
-        board.querySelector("tbody").appendChild(tr);
+        board.querySelector("tbody").appendChild(createBoardRow(ROWS[r]));
     }
 }
 
 // ---- Ship Placement Helpers ----
+
+/** Returns a cell ID (e.g. "A5") offset from a starting position in the given direction. */
 function getCellId(direction, startRowIndex, startCol, offset) {
     if (direction === "horizontal") {
         return ROWS[startRowIndex] + (startCol + offset);
@@ -46,6 +57,7 @@ function getCellId(direction, startRowIndex, startCol, offset) {
     return ROWS[startRowIndex + offset] + startCol;
 }
 
+/** Returns a random direction, row index and column for ship placement. */
 function getRandomPosition() {
     const direction = DIRECTIONS[Math.floor(Math.random() * 2)];
     const startRowIndex = Math.floor(Math.random() * BOARD_SIZE);
@@ -53,6 +65,7 @@ function getRandomPosition() {
     return { direction, startRowIndex, startCol };
 }
 
+/** Checks whether a ship of the given size fits on the board from the start position. */
 function shipFits(direction, startRowIndex, startCol, size) {
     if (direction === "horizontal") {
         return startCol + size - 1 <= BOARD_SIZE;
@@ -60,6 +73,7 @@ function shipFits(direction, startRowIndex, startCol, size) {
     return startRowIndex + size - 1 <= BOARD_SIZE - 1;
 }
 
+/** Returns true if any cell in the proposed range already contains a ship. */
 function hasOverlap(direction, startRowIndex, startCol, size) {
     for (let i = 0; i < size; i++) {
         const cellId = getCellId(direction, startRowIndex, startCol, i);
@@ -82,6 +96,7 @@ function placeShip(ship, direction, startRowIndex, startCol) {
 }
 
 // ---- Ship Placement ----
+
 function placeCompShips() {
     for (const ship of SHIPS) {
         let placed = false;
@@ -97,26 +112,49 @@ function placeCompShips() {
     }
 }
 
+// ---- Dropdown Helpers ----
+
+/** Creates and appends an <option> element to a <select>. */
+function addOption(selectElement, value) {
+    const option = document.createElement("option");
+    option.value = value;
+    option.textContent = value;
+    selectElement.appendChild(option);
+}
+
 // ---- Dropdown Setup ----
+
+/** Fills the row and column dropdown menus with their options. */
 function populateDropdowns() {
     const rowSelect = document.getElementById("row-select");
     for (let r = 0; r < ROWS.length; r++) {
-        const option = document.createElement("option");
-        option.value = ROWS[r];
-        option.textContent = ROWS[r];
-        rowSelect.appendChild(option);
+        addOption(rowSelect, ROWS[r]);
     }
 
     const colSelect = document.getElementById("column-select");
     for (let c = 1; c <= BOARD_SIZE; c++) {
-        const option = document.createElement("option");
-        option.value = c;
-        option.textContent = c;
-        colSelect.appendChild(option);
+        addOption(colSelect, c);
+    }
+}
+
+// ---- Game Logic Helpers ----
+
+function alreadyFired(cell) {
+    return cell.classList.contains("hit") || cell.classList.contains("miss");
+}
+
+function fireAtCell(cell) {
+    if (cell.classList.contains("ship")) {
+        cell.classList.add("hit");
+        cell.textContent = "X";
+    } else {
+        cell.classList.add("miss");
+        cell.textContent = "O";
     }
 }
 
 // ---- Game Logic ----
+
 function setupFireButton() {
     const rowSelect = document.getElementById("row-select");
     const colSelect = document.getElementById("column-select");
@@ -125,18 +163,12 @@ function setupFireButton() {
         const cellId = rowSelect.value + colSelect.value;
         const cell = document.getElementById(cellId);
 
-        if (cell.classList.contains("hit") || cell.classList.contains("miss")) {
+        if (alreadyFired(cell)) {
             alert("You already fired there! Pick another cell.");
             return;
         }
 
-        if (cell.classList.contains("ship")) {
-            cell.classList.add("hit");
-            cell.textContent = "X";
-        } else {
-            cell.classList.add("miss");
-            cell.textContent = "O";
-        }
+        fireAtCell(cell);
     });
 }
 
